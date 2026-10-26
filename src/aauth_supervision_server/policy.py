@@ -70,12 +70,14 @@ class Rule:
     result_contains_any: list[str] | None = None
     param_domain_not_in: dict[str, list[str]] | None = None
     param_gt: dict[str, int] | None = None
+    param_in: dict[str, list[str]] | None = None
     amount_param: str | None = None
     if_unknown: str | None = None
 
     @property
     def needs_data(self) -> bool:
-        return bool(self.result_contains_any or self.param_domain_not_in or self.param_gt)
+        return bool(self.result_contains_any or self.param_domain_not_in or self.param_gt
+                    or self.param_in)
 
 
 @dataclass
@@ -360,6 +362,10 @@ def _check_policy_shape(d: Any) -> None:
                 if not isinstance(v, dict) or not v or not all(
                         isinstance(p, str) and _finite(x) for p, x in v.items()):
                     bad(f"{w}.{k}", "must map parameter names to finite numbers")
+            elif k == "param_in":
+                if not isinstance(v, dict) or not v or not all(
+                        isinstance(p, str) and _is_str_list(x) and x for p, x in v.items()):
+                    bad(f"{w}.{k}", "must map parameter names to non-empty arrays of strings")
             else:
                 bad(f"{w}.{k}", "unknown member")
     for k, n in (("prohibited_pairs", 2), ("prohibited_sequences", 0)):
@@ -1088,6 +1094,17 @@ class Policy:
             if not math.isfinite(value):
                 return None
             ok = ok and value > limit
+        for pname, values in (r.param_in or {}).items():
+            # A code the resource states (a merchant category, a payee id), matched exactly.
+            # A list names each of its values, like a list of recipients: one in the set is
+            # enough. An integer reads as its decimal digits; anything else, or a parameter
+            # the act does not carry, is not visible.
+            v = (act.parameters or {}).get(pname)
+            items = v if isinstance(v, list) else [v]
+            if not all(isinstance(x, str) or (isinstance(x, int) and not isinstance(x, bool))
+                       for x in items):
+                return None  # absent, an R3 digest object, a float, an object
+            ok = ok and any(str(x) in values for x in items)
         return ok
 
     def _static_match(self, r: Rule, act: Act) -> bool:

@@ -158,7 +158,10 @@ prints the policy it uses.
     (`param_domain_not_in`) reads every recipient a value names, in every parameter the
     rule names: `a@x.example, b@y.example` is two. A parameter the act does not carry
     names nobody. A recipient that is not plainly `local@domain` is outside every listed
-    domain.
+    domain. A code rule (`param_in`) matches when each parameter it names carries a value
+    in its set, exactly, such as a merchant category code in an offer: a list matches when
+    any of its values does, an integer reads as its digits, and a parameter that is absent
+    or not a string or integer (an R3 digest object, a float) leaves the rule undecided.
   - **Provenance on every classification.** Evidence is tagged `resource`, `configured`
     or `agent`. An act replayed to this SS keeps the provenance of what the replay
     carries, and is marked as replayed. An act the resource's R3 proposal describes
@@ -556,7 +559,7 @@ The policy file (`--policy`):
 | Member | Meaning (default) |
 |---|---|
 | `severity` | The classes, least severe first (required: every class the policy names, `default_class` included) |
-| `rules` | In order: each names a `class`, what it matches (`resource`, `operation`, `scope`, `tool`, glob patterns as Python's `fnmatch.fnmatchcase` reads them: `*`, `?`, `[...]` and `[!...]`, case-sensitively; `[[]` matches a literal `[`) and, for a data rule, what it reads (`param_domain_not_in`, `param_gt`, `result_contains_any`), with `amount_param` (the parameter a budget counts) and `if_unknown` (the class to take when the data is not there) |
+| `rules` | In order: each names a `class`, what it matches (`resource`, `operation`, `scope`, `tool`, glob patterns as Python's `fnmatch.fnmatchcase` reads them: `*`, `?`, `[...]` and `[!...]`, case-sensitively; `[[]` matches a literal `[`) and, for a data rule, what it reads (`param_domain_not_in`, `param_gt`, `param_in`, `result_contains_any`), with `amount_param` (the parameter a budget counts) and `if_unknown` (the class to take when the data is not there) |
 | `default_class` | The class of an act no rule names (`unclassified`) |
 | `prohibited_pairs`, `prohibited_sequences` | Compositions of classes the SS will not let complete |
 | `composition_on_certain` | What a composition on certain evidence gets: `deny` (default) or `ask` |

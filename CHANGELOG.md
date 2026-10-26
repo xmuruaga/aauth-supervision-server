@@ -10,6 +10,16 @@ revision it implements. The drafts are pinned to the AAuth repository at commit
 
 ## [Unreleased]
 
+### Added
+
+- **`param_in`, a rule that reads a code the resource states.** It maps parameter names
+  to sets of strings and matches when each named parameter carries a value in its set,
+  exactly (a list when any of its values does; an integer as its digits). It reads the
+  parameters of a forwarded R3 proposal (`r3_member`), such as an offer's merchant
+  category code, and of permission requests. A parameter that is absent or not a string
+  or integer leaves the rule undecided, so `if_unknown` and the agent-data rules apply as
+  for the other data rules.
+
 ## [0.2.0] - 2026-10-19: implements AAuth Supervision -00
 
 ### Fixed
